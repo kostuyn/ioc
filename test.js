@@ -1,3 +1,6 @@
+// const assert = require('chai').assert;
+const assert = require('assert');
+
 const IocContainer = require('./index');
 
 describe('Test', () => {
@@ -21,6 +24,35 @@ describe('Test', () => {
 
 		const s = ioc.getInstance('s');
 		s.hello();
+	});
+
+	it('check duplicate names', () => {
+		const ioc = new IocContainer();
+
+		ioc.registerClass('a', A);
+
+		assert.throws(() => {
+			ioc.registerClass('a', B);
+		});
+
+		assert.throws(() => {
+			ioc.registerFactory('a', factoryA);
+		});
+
+		assert.throws(() => {
+			ioc.registerValue('a', 'hello');
+		});
+	});
+
+	it('check registered entities', () => {
+		const ioc = new IocContainer();
+		ioc.registerClass('a', 123);
+
+
+		assert.throws(() => {
+			ioc.checkDependencies();
+		});
+
 	});
 });
 

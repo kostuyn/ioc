@@ -6,17 +6,22 @@ class IocContainer {
 		this._factories = new Map();
 		this._instances = new Map();
 		this._values = new Map();
+
+		this._uniqueNames = new Set();
 	}
 
 	registerClass(name, Class, isSingleton = false) {
+		this._checkDuplicateName(name);
 		this._classes.set(name, {Class, isSingleton});
 	}
 
 	registerFactory(name, factory) {
+		this._checkDuplicateName(name);
 		this._factories.set(name, factory);
 	}
 
 	registerValue(name, value) {
+		this._checkDuplicateName(name);
 		this._values.set(name, value);
 	}
 
@@ -56,20 +61,38 @@ class IocContainer {
 		throw new Error('Dependency ' + name + ' not found');
 	}
 
+	checkDependencies() {
+		this._uniqueNames.forEach((name) => {
+			try{
+				this.getInstance(name);
+			} catch(e) {
+				throw new Error('Dependency "' + name + '" fail: ' + e.message);
+			}
+		});
+	}
+
+	_checkDuplicateName(name) {
+		if(this._uniqueNames.has(name)) {
+			throw new Error('Duplicate dependency name:' + name);
+		}
+
+		this._uniqueNames.add(name);
+	}
+
 	_getDependencies(args) {
 		return args.map((argName) => {
 			return this.getInstance(argName);
 		});
 	}
 
-	_getFunctionArgNames(funcName) {
+	_getFunctionArgNames(func) {
 		const regex = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
-		return this._parseArgs(funcName, regex);
+		return this._parseArgs(func, regex);
 	};
 
-	_getConstructorArgNames(className) {
+	_getConstructorArgNames(cls) {
 		const regex = /constructor\s*[^\(]*\(\s*([^\)]*)\)/m;
-		return this._parseArgs(className, regex);
+		return this._parseArgs(cls, regex);
 	};
 
 	_parseArgs(method, regex) {
