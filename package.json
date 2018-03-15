@@ -1,5 +1,5 @@
 {
-  "name": "ioc",
+  "name": "true-ioc",
   "version": "1.0.0",
   "description": "Simple inversion of control container",
   "author": "Konstantin Altuhov",

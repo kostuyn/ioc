@@ -5,6 +5,7 @@ class IocContainer {
 		this._classes = new Map();
 		this._factories = new Map();
 		this._instances = new Map();
+		this._values = new Map();
 	}
 
 	registerClass(name, Class, isSingleton = false) {
@@ -15,28 +16,37 @@ class IocContainer {
 		this._factories.set(name, factory);
 	}
 
+	registerValue(name, value) {
+		this._values.set(name, value);
+	}
+
 	getInstance(name) {
 		const instance = this._instances.get(name);
-		if(instance){
+		if(instance) {
 			return instance;
 		}
 
-		const classItem = this._classes.get(name);
-		const factory = this._factories.get(name);
+		const value = this._values.get(name);
+		if(value) {
+			return value;
+		}
 
+		const classItem = this._classes.get(name);
 		if(classItem) {
 			const args = this._getConstructorArgNames(classItem.Class);
 			const dependencies = this._getDependencies(args);
 
 			const instance = new classItem.Class(...dependencies);
 
-			if(classItem.isSingleton){
+			if(classItem.isSingleton) {
 				this._instances.set(name, instance);
 			}
 
 			return instance;
 		}
-		else if(factory) {
+
+		const factory = this._factories.get(name);
+		if(factory) {
 			const args = this._getFunctionArgNames(factory);
 			const dependencies = this._getDependencies(args);
 

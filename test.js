@@ -13,6 +13,8 @@ describe('Test', () => {
 		ioc.registerFactory('factoryA', factoryA);
 		ioc.registerFactory('factoryC', factoryC);
 
+		ioc.registerValue('myValue', 'hello world!');
+
 		const aFactory = ioc.getInstance('factoryA');
 		const a = aFactory.create();
 		a.hello();
@@ -48,7 +50,14 @@ class A extends Base {
 }
 
 class B extends Base {
+	constructor(myValue) {
+		super();
+
+		this._myValue = myValue;
+	}
+
 	hello() {
+		console.log(this._myValue);
 		this._hello();
 	}
 }
