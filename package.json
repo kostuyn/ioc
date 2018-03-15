@@ -1,0 +1,21 @@
+{
+  "name": "ioc",
+  "version": "1.0.0",
+  "description": "Simple inversion of control container",
+  "author": "Konstantin Altuhov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kostuyn/ioc"
+  },
+  "bugs": {
+    "url": "https://github.com/kostuyn/ioc/issues"
+  },
+  "keywords": [
+    "ioc",
+    "di",
+    "container",
+    "dependency",
+    "injection"
+  ]
+}
