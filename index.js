@@ -1,7 +1,9 @@
 'use strict';
 
-class IocContainer {
-	constructor() {
+class Container {
+	constructor(parentContainer) {
+		this._parentContainer = parentContainer;
+
 		this._classes = new Map();
 		this._factories = new Map();
 		this._instances = new Map();
@@ -10,33 +12,49 @@ class IocContainer {
 		this._uniqueNames = new Set();
 	}
 
+	classesGet(name){
+		return this._classes.get(name) || this._parentContainer && this._parentContainer.classesGet(name);
+	}
+
+	factoriesGet(name){
+		return this._factories.get(name) || this._parentContainer && this._parentContainer.factoriesGet(name);
+	}
+
+	instancesGet(name){
+		return this._instances.get(name) || this._parentContainer && this._parentContainer.instancesGet(name);
+	}
+
+	valuesGet(name){
+		return this._values.get(name) || this._parentContainer && this._parentContainer.valuesGet(name);
+	}
+
 	registerClass(name, Class, isSingleton = false) {
-		this._checkDuplicateName(name);
+		this._setName(name);
 		this._classes.set(name, {Class, isSingleton});
 	}
 
 	registerFactory(name, factory) {
-		this._checkDuplicateName(name);
+		this._setName(name);
 		this._factories.set(name, factory);
 	}
 
 	registerValue(name, value) {
-		this._checkDuplicateName(name);
+		this._setName(name);
 		this._values.set(name, value);
 	}
 
 	getInstance(name) {
-		const instance = this._instances.get(name);
+		const instance = this.instancesGet(name);
 		if(instance) {
 			return instance;
 		}
 
-		const value = this._values.get(name);
+		const value = this.valuesGet(name);
 		if(value) {
 			return value;
 		}
 
-		const classItem = this._classes.get(name);
+		const classItem = this.classesGet(name);
 		if(classItem) {
 			const args = this._getConstructorArgNames(classItem.Class);
 			const dependencies = this._getDependencies(args);
@@ -50,7 +68,7 @@ class IocContainer {
 			return instance;
 		}
 
-		const factory = this._factories.get(name);
+		const factory = this.factoriesGet(name);
 		if(factory) {
 			const args = this._getFunctionArgNames(factory);
 			const dependencies = this._getDependencies(args);
@@ -69,13 +87,20 @@ class IocContainer {
 				throw new Error('Dependency "' + name + '" fail: ' + e.message);
 			}
 		});
+
+		if(this._parentContainer){
+			this._parentContainer.checkDependencies();
+		}
 	}
 
-	_checkDuplicateName(name) {
+	checkDuplicateName(name){
 		if(this._uniqueNames.has(name)) {
 			throw new Error('Duplicate dependency name:' + name);
 		}
+	}
 
+	_setName(name) {
+		this.checkDuplicateName(name);
 		this._uniqueNames.add(name);
 	}
 
@@ -107,4 +132,4 @@ class IocContainer {
 	}
 }
 
-module.exports = IocContainer;
+module.exports = Container;

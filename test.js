@@ -1,58 +1,102 @@
 // const assert = require('chai').assert;
 const assert = require('assert');
 
-const IocContainer = require('./index');
+const Container = require('./index');
 
 describe('Test', () => {
 	it('registration & instantiation', () => {
-		const ioc = new IocContainer();
+		const container = new Container();
 
-		ioc.registerClass('a', A);
-		ioc.registerClass('b', B, true);
-		ioc.registerClass('c', C);
-		ioc.registerClass('d', D);
-		ioc.registerClass('s', S);
+		container.registerClass('a', A);
+		container.registerClass('b', B, true);
+		container.registerClass('c', C);
+		container.registerClass('d', D);
+		container.registerClass('s', S);
 
-		ioc.registerFactory('factoryA', factoryA);
-		ioc.registerFactory('factoryC', factoryC);
+		container.registerFactory('factoryA', factoryA);
+		container.registerFactory('factoryC', factoryC);
 
-		ioc.registerValue('myValue', 'hello world!');
+		container.registerValue('myValue', 'hello world!');
 
-		const aFactory = ioc.getInstance('factoryA');
+		const aFactory = container.getInstance('factoryA');
 		const a = aFactory.create();
 		a.hello();
 
-		const s = ioc.getInstance('s');
+		const s = container.getInstance('s');
 		s.hello();
 	});
 
 	it('check duplicate names', () => {
-		const ioc = new IocContainer();
+		const container = new Container();
 
-		ioc.registerClass('a', A);
+		container.registerClass('a', A);
 
 		assert.throws(() => {
-			ioc.registerClass('a', B);
+			container.registerClass('a', B);
 		});
 
 		assert.throws(() => {
-			ioc.registerFactory('a', factoryA);
+			container.registerFactory('a', factoryA);
 		});
 
 		assert.throws(() => {
-			ioc.registerValue('a', 'hello');
+			container.registerValue('a', 'hello');
 		});
 	});
 
 	it('check registered entities', () => {
-		const ioc = new IocContainer();
-		ioc.registerClass('a', 123);
+		const container = new Container();
+		container.registerClass('a', 123);
 
 
 		assert.throws(() => {
-			ioc.checkDependencies();
+			container.checkDependencies();
 		});
+	});
 
+	it('duplicate name with parent container', () => {
+		const parentContainer = new Container();
+		const container = new Container(parentContainer);
+
+		parentContainer.registerClass('myClass', D);
+		container.registerClass('myClass', E);
+
+		const myClass1 = parentContainer.getInstance('myClass');
+		const myClass2 = container.getInstance('myClass');
+
+		assert.ok(myClass1 instanceof D);
+		assert.ok(myClass2 instanceof E);
+	});
+
+	it('instantiate with parent container', () => {
+		const parentContainer = new Container();
+		const container = new Container(parentContainer);
+
+		parentContainer.registerClass('a', A);
+		parentContainer.registerClass('b', B, true);
+		parentContainer.registerClass('c', C);
+		parentContainer.registerClass('d', D);
+
+		parentContainer.registerValue('myValue', 'hello world!');
+		container.registerClass('myValue', 'another value');
+
+		const a1 = parentContainer.getInstance('a');
+		const a2 = container.getInstance('a');
+
+		assert.ok(a1 instanceof A);
+		assert.ok(a2 instanceof A);
+	});
+
+	it('check registered entities with parent container', () => {
+		const parentContainer = new Container();
+		const container = new Container(parentContainer);
+
+		parentContainer.registerClass('a', 123);
+		container.registerValue('b', 456);
+
+		assert.throws(() => {
+			container.checkDependencies();
+		});
 	});
 });
 
@@ -110,6 +154,12 @@ class C extends Base {
 }
 
 class D extends Base {
+	hello() {
+		this._hello();
+	}
+}
+
+class E extends Base {
 	hello() {
 		this._hello();
 	}
