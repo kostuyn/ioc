@@ -15,12 +15,26 @@ describe('Test', () => {
 
 		container.registerFactory('factoryA', factoryA);
 		container.registerFactory('factoryC', factoryC);
+		container.registerFactory('factoryB', factoryB);
+		container.registerFactory('factoryD', factoryD);
 
 		container.registerValue('myValue', 'hello world!');
+    container.registerValue('val1', 'TEST1');
+    container.registerValue('val2', 'TEST2');
+    container.registerValue('val3', 'TEST3');
+    container.registerValue('val4', 'TEST4');
+
 
 		const aFactory = container.getInstance('factoryA');
 		const a = aFactory.create();
-		a.hello();
+		assert.ok(a instanceof A);
+
+    const bFactory = container.getInstance('factoryB');
+    const b = bFactory.create();
+    assert.ok(b instanceof C);
+
+    const d = container.getInstance('factoryD');
+    assert.ok(d === 'test1test2test3test4');
 
 		const s = container.getInstance('s');
 		s.hello();
@@ -182,10 +196,24 @@ class S extends Base {
 
 function factoryA(b, c) {
 	console.log('factoryA with', b, c);
-	return {create: () => new A(b, c)}
+	return {
+		create: () => new A(b, c)
+	}
 }
+
+const factoryB = (b, d) => {
+  return {
+    create: () => new C(b, d),
+  }
+};
 
 function factoryC(b, d) {
 	console.log('factoryC with', b, d);
-	return {create: () => new C(b, d)}
+	return {
+		create: () => new C(b, d)
+	}
 }
+
+const factoryD = (    val1,
+											val2,      val3,
+											val4    ) => (val1+val2+val3+val4).toLowerCase();
