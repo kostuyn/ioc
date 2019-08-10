@@ -17,5 +17,12 @@
     "container",
     "dependency",
     "injection"
-  ]
+  ],
+  "devDependencies": {
+    "mocha": "6.2.0"
+  },
+  "scripts": {
+    "test": "mocha test.js --exit",
+    "prepublish": "npm run test"
+  }
 }
