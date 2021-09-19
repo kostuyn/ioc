@@ -111,7 +111,7 @@ class Container {
 	}
 
 	_getFunctionArgNames(func) {
-		const regex = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+		const regex = /^(?:function)?\s*[^\(]*\(\s*([^\)]*)\)(?:=>)?/m;
 		return this._parseArgs(func, regex);
 	};
 
